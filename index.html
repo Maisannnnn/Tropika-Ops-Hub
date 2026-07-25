@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tropika Ops Hub</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+  <div id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <div class="auth-title">TROPIKA OPS HUB</div>
+      <p class="hint">Sign in to your operator account.</p>
+      <input type="email" id="authEmail" placeholder="Email">
+      <input type="password" id="authPassword" placeholder="Password">
+      <button class="btn primary" onclick="signIn()">Sign in</button>
+      <button class="btn secondary" onclick="signUp()">Create account (first time only)</button>
+      <div id="authStatus" class="hint"></div>
+    </div>
+  </div>
+
+  <div id="appShell" style="display:none">
+    <aside class="sidebar">
+      <div class="brand">TROPIKA<br>OPS HUB</div>
+      <nav>
+        <button class="nav-item active" data-tab="properties" onclick="switchTab('properties')">Properties</button>
+        <button class="nav-item" data-tab="agents" onclick="switchTab('agents')">Agents</button>
+        <button class="nav-item" data-tab="bookings" onclick="switchTab('bookings')">Bookings</button>
+        <button class="nav-item" data-tab="finances" onclick="switchTab('finances')">Finances</button>
+        <button class="nav-item" data-tab="arrivals" onclick="switchTab('arrivals')">Arrivals</button>
+      </nav>
+      <button class="btn secondary" style="margin-top:auto" onclick="signOut()">Sign out</button>
+    </aside>
+
+    <main>
+      <!-- PROPERTIES -->
+      <section id="tab-properties" class="tab active">
+        <h1>Properties</h1>
+
+        <div class="panel">
+          <h2>Discover on Google Maps</h2>
+          <div class="search-bar">
+            <input type="text" id="islandInput" placeholder="Enter an island (e.g. Maafushi)">
+            <button class="btn primary" id="searchBtn" onclick="runSearch()">Search</button>
+          </div>
+          <div id="loading" class="hint">Searching...</div>
+          <div id="searchGrid" class="grid"></div>
+          <div id="searchPushRow" class="footer-actions" style="display:none">
+            <span id="selectedCount" class="hint"></span>
+            <button class="btn primary" onclick="pushSelectedToProperties()">Add selected to Properties</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Add property manually</h2>
+          <div class="form-grid">
+            <input type="text" id="pName" placeholder="Name">
+            <input type="text" id="pIsland" placeholder="Island">
+            <input type="text" id="pAddress" placeholder="Address">
+            <input type="text" id="pPhone" placeholder="Phone">
+            <input type="text" id="pWebsite" placeholder="Website">
+            <select id="pStatus">
+              <option value="prospect">Prospect</option>
+              <option value="contacted">Contacted</option>
+              <option value="negotiating">Negotiating</option>
+              <option value="contract_sent">Contract sent</option>
+              <option value="partnered">Partnered</option>
+            </select>
+            <input type="text" id="pContactPerson" placeholder="Contact person">
+            <input type="email" id="pContactEmail" placeholder="Contact email">
+          </div>
+          <button class="btn primary" onclick="addPropertyManually()">Add property</button>
+        </div>
+
+        <div class="panel">
+          <h2>Directory</h2>
+          <table class="data-table" id="propertiesTable">
+            <thead><tr><th>Name</th><th>Island</th><th>Status</th><th>Contact</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- AGENTS -->
+      <section id="tab-agents" class="tab">
+        <h1>Agents</h1>
+        <div class="panel">
+          <h2>Add agent</h2>
+          <div class="form-grid">
+            <input type="text" id="aName" placeholder="Agent name">
+            <input type="text" id="aAgency" placeholder="Agency name">
+            <input type="text" id="aCountry" placeholder="Country">
+            <input type="text" id="aWhatsapp" placeholder="WhatsApp">
+            <input type="email" id="aEmail" placeholder="Email">
+            <select id="aStage">
+              <option value="new">New</option>
+              <option value="engaged">Engaged</option>
+              <option value="active">Active</option>
+              <option value="dormant">Dormant</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="addAgent()">Add agent</button>
+        </div>
+        <div class="panel">
+          <h2>Directory</h2>
+          <table class="data-table" id="agentsTable">
+            <thead><tr><th>Name</th><th>Agency</th><th>Country</th><th>Stage</th><th>Contact</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- BOOKINGS -->
+      <section id="tab-bookings" class="tab">
+        <h1>Bookings</h1>
+        <div class="panel">
+          <h2>New booking request</h2>
+          <div class="form-grid">
+            <select id="bProperty" onchange="onBookingPropertyChange()"><option value="">Select property</option></select>
+            <select id="bRoom"><option value="">Select room type</option></select>
+            <select id="bAgent"><option value="">Select agent</option></select>
+            <input type="text" id="bGuestName" placeholder="Guest name">
+            <input type="number" id="bGuestCount" placeholder="Guest count">
+            <input type="date" id="bCheckIn">
+            <input type="date" id="bCheckOut">
+            <input type="number" id="bQuoteAmount" placeholder="Quote amount (USD)">
+          </div>
+          <button class="btn secondary" onclick="generateBookingRequest()">Generate booking request text</button>
+          <textarea id="bRequestText" rows="8" placeholder="Generated booking request will appear here — copy into your email to the property."></textarea>
+          <button class="btn primary" onclick="saveBooking()">Save booking</button>
+        </div>
+        <div class="panel">
+          <h2>All bookings</h2>
+          <table class="data-table" id="bookingsTable">
+            <thead><tr><th>Guest</th><th>Property</th><th>Agent</th><th>Check-in</th><th>Check-out</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FINANCES -->
+      <section id="tab-finances" class="tab">
+        <h1>Finances</h1>
+        <div class="panel">
+          <h2>New invoice</h2>
+          <div class="form-grid">
+            <select id="iBooking"><option value="">Select booking</option></select>
+            <input type="text" id="iNumber" placeholder="Invoice number">
+            <input type="number" id="iAmount" placeholder="Amount (USD)">
+            <input type="date" id="iDateIssued">
+            <input type="date" id="iDueDate">
+            <select id="iStatus">
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="addInvoice()">Add invoice</button>
+        </div>
+        <div class="panel">
+          <h2>Invoice log</h2>
+          <table class="data-table" id="invoicesTable">
+            <thead><tr><th>Invoice #</th><th>Booking</th><th>Amount</th><th>Issued</th><th>Due</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ARRIVALS -->
+      <section id="tab-arrivals" class="tab">
+        <h1>Arrivals</h1>
+        <p class="hint">Confirmed bookings checking in within the next <span id="arrivalsWindowLabel"></span> days.</p>
+        <div class="panel">
+          <table class="data-table" id="arrivalsTable">
+            <thead><tr><th>Guest</th><th>Property</th><th>Check-in</th><th>Check-out</th><th>Guests</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
