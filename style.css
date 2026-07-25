@@ -1,0 +1,84 @@
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --ink-soft: #555555;
+  --line: #e2e2e2;
+  --panel: #fafafa;
+  --hover: #000000;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+h1 { font-size: 20px; font-weight: 600; margin: 0 0 18px; letter-spacing: 0.2px; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--ink-soft); margin: 0 0 14px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+
+/* Auth */
+.auth-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
+.auth-card { width: 320px; background: #fff; border-radius: 12px; padding: 32px; display: flex; flex-direction: column; gap: 10px; }
+.auth-title { font-weight: 700; letter-spacing: 1px; font-size: 15px; margin-bottom: 4px; }
+.auth-card input { padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; }
+
+/* Layout */
+#appShell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 190px; background: var(--ink); color: #fff;
+  display: flex; flex-direction: column; padding: 24px 16px; gap: 6px; flex-shrink: 0;
+}
+.brand { font-weight: 700; font-size: 14px; letter-spacing: 0.8px; line-height: 1.4; margin-bottom: 20px; }
+.nav-item {
+  background: none; border: none; color: #bbbbbb; text-align: left;
+  padding: 10px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;
+}
+.nav-item:hover { background: #1f1f1f; color: #fff; }
+.nav-item.active { background: #fff; color: #111; font-weight: 600; }
+
+main { flex: 1; padding: 32px 40px; max-width: 1000px; }
+.tab { display: none; }
+.tab.active { display: block; }
+
+/* Panels */
+.panel { border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin-bottom: 24px; background: var(--panel); }
+
+/* Buttons */
+.btn { font-size: 13px; font-weight: 600; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer; }
+.btn.primary { background: var(--ink); color: #fff; }
+.btn.primary:hover { background: #000; }
+.btn.secondary { background: #fff; border: 1px solid var(--line); color: var(--ink); }
+.btn.secondary:hover { border-color: var(--ink); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Forms */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.form-grid input, .form-grid select, .search-bar input, textarea {
+  padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; width: 100%; font-family: inherit;
+}
+textarea { margin: 12px 0; resize: vertical; }
+.search-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+.search-bar input { flex: 1; }
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { text-align: left; padding: 8px 10px; color: var(--ink-soft); border-bottom: 1px solid var(--line); font-weight: 600; }
+.data-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.data-table select { border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font-size: 12px; }
+
+/* Property search grid (reused from discovery tool) */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 14px; }
+.card { border: 1px solid var(--line); border-radius: 10px; padding: 12px; position: relative; background: #fff; }
+.card-select { position: absolute; top: 10px; left: 10px; }
+.card-name { font-weight: 600; font-size: 13px; margin: 6px 0 2px; }
+.card-meta { font-size: 12px; color: var(--ink-soft); }
+.hint { color: var(--ink-soft); font-size: 12px; margin: 6px 0; }
+#loading { display: none; }
+
+.footer-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+
+#status { position: fixed; bottom: 16px; right: 16px; font-size: 13px; }
+.status-line { padding: 6px 12px; border-radius: 6px; background: #111; color: #fff; margin-top: 6px; }
+.status-line.err { background: #a83232; }
+
+.badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #eee; color: #333; }
