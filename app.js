@@ -5,10 +5,7 @@ try {
   if (!window.supabase) throw new Error('Supabase library did not load from the CDN.');
   sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 } catch (err) {
-  window.addEventListener('load', () => {
-    const el = document.getElementById('authStatus');
-    if (el) el.innerHTML = `<span style="color:#a83232">Setup error: ${err.message}</span>`;
-  });
+  window.addEventListener('load', () => showStatus('Setup error: ' + err.message, true));
 }
 
 let allProperties = [];
@@ -18,48 +15,9 @@ let allBookings = [];
 let searchResults = {}; // id -> { data, selected }
 let currentIsland = '';
 
-// ---------- Auth ----------
-
-async function signUp() {
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const { error } = await sb.auth.signUp({ email, password });
-  setAuthStatus(error ? error.message : 'Account created — check email for confirmation if required, then sign in.', !!error);
-}
-
-async function signIn() {
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) {
-    setAuthStatus(error.message, true);
-    return;
-  }
-  onSignedIn();
-}
-
-async function signOut() {
-  await sb.auth.signOut();
-  document.getElementById('appShell').style.display = 'none';
-  document.getElementById('authGate').style.display = 'flex';
-}
-
-function setAuthStatus(text, isError) {
-  document.getElementById('authStatus').innerHTML = text ? `<span style="color:${isError ? '#a83232' : '#555'}">${escapeHtml(text)}</span>` : '';
-}
-
-async function onSignedIn() {
+async function initApp() {
   document.getElementById('arrivalsWindowLabel').textContent = CONFIG.ARRIVALS_WINDOW_DAYS;
   await refreshAll();
-}
-
-// NOTE: Auth is temporarily disabled for testing. The app loads directly
-// without requiring sign-in, and the matching Supabase RLS policies have
-// been relaxed to allow the anon role too (see updated schema note).
-// Re-enable by restoring the auth gate in index.html and calling
-// checkExistingSession() below instead of onSignedIn() directly.
-async function checkExistingSession() {
-  await onSignedIn();
 }
 
 // ---------- Tabs ----------
@@ -490,4 +448,4 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-window.addEventListener('load', checkExistingSession);
+window.addEventListener('load', initApp);
