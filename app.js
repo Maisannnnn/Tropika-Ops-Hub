@@ -1,9 +1,9 @@
 // Tropika Ops Hub — app logic
 
-let supabase;
+let sb;
 try {
   if (!window.supabase) throw new Error('Supabase library did not load from the CDN.');
-  supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 } catch (err) {
   window.addEventListener('load', () => {
     const el = document.getElementById('authStatus');
@@ -23,14 +23,14 @@ let currentIsland = '';
 async function signUp() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await sb.auth.signUp({ email, password });
   setAuthStatus(error ? error.message : 'Account created — check email for confirmation if required, then sign in.', !!error);
 }
 
 async function signIn() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
     setAuthStatus(error.message, true);
     return;
@@ -39,7 +39,7 @@ async function signIn() {
 }
 
 async function signOut() {
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   document.getElementById('appShell').style.display = 'none';
   document.getElementById('authGate').style.display = 'flex';
 }
@@ -56,7 +56,7 @@ async function onSignedIn() {
 }
 
 async function checkExistingSession() {
-  const { data } = await supabase.auth.getSession();
+  const { data } = await sb.auth.getSession();
   if (data.session) onSignedIn();
 }
 
@@ -82,22 +82,22 @@ async function refreshAll() {
 }
 
 async function loadProperties() {
-  const { data: props } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
-  const { data: rooms } = await supabase.from('property_rooms').select('*');
+  const { data: props } = await sb.from('properties').select('*').order('created_at', { ascending: false });
+  const { data: rooms } = await sb.from('property_rooms').select('*');
   allProperties = props || [];
   allRooms = rooms || [];
 }
 async function loadAgents() {
-  const { data } = await supabase.from('agents').select('*').order('created_at', { ascending: false });
+  const { data } = await sb.from('agents').select('*').order('created_at', { ascending: false });
   allAgents = data || [];
 }
 async function loadBookings() {
-  const { data } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
+  const { data } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
   allBookings = data || [];
 }
 let allInvoices = [];
 async function loadInvoices() {
-  const { data } = await supabase.from('invoices').select('*').order('created_at', { ascending: false });
+  const { data } = await sb.from('invoices').select('*').order('created_at', { ascending: false });
   allInvoices = data || [];
 }
 
@@ -110,7 +110,7 @@ async function addPropertyManually() {
     contact_person: val('pContactPerson'), contact_email: val('pContactEmail'),
   };
   if (!row.name) { showStatus('Property name is required.', true); return; }
-  const { error } = await supabase.from('properties').insert(row);
+  const { error } = await sb.from('properties').insert(row);
   if (error) { showStatus('Error: ' + error.message, true); return; }
   showStatus('Property added.');
   ['pName','pIsland','pAddress','pPhone','pWebsite','pContactPerson','pContactEmail'].forEach((id) => document.getElementById(id).value = '');
@@ -138,7 +138,7 @@ async function addAgent() {
     whatsapp: val('aWhatsapp'), email: val('aEmail'), relationship_stage: val('aStage'),
   };
   if (!row.name) { showStatus('Agent name is required.', true); return; }
-  const { error } = await supabase.from('agents').insert(row);
+  const { error } = await sb.from('agents').insert(row);
   if (error) { showStatus('Error: ' + error.message, true); return; }
   showStatus('Agent added.');
   ['aName','aAgency','aCountry','aWhatsapp','aEmail'].forEach((id) => document.getElementById(id).value = '');
@@ -229,7 +229,7 @@ async function saveBooking() {
   };
   if (!row.property_id) { showStatus('Select a property first.', true); return; }
 
-  const { error } = await supabase.from('bookings').insert(row);
+  const { error } = await sb.from('bookings').insert(row);
   if (error) { showStatus('Error: ' + error.message, true); return; }
   showStatus('Booking saved.');
   await loadBookings();
@@ -239,7 +239,7 @@ async function saveBooking() {
 }
 
 async function updateBookingStatus(id, status) {
-  const { error } = await supabase.from('bookings').update({ status }).eq('id', id);
+  const { error } = await sb.from('bookings').update({ status }).eq('id', id);
   if (error) { showStatus('Error: ' + error.message, true); return; }
   await loadBookings();
   renderArrivalsTable();
@@ -285,7 +285,7 @@ async function addInvoice() {
     due_date: val('iDueDate') || null,
     status: val('iStatus'),
   };
-  const { error } = await supabase.from('invoices').insert(row);
+  const { error } = await sb.from('invoices').insert(row);
   if (error) { showStatus('Error: ' + error.message, true); return; }
   showStatus('Invoice added.');
   await loadInvoices();
@@ -456,7 +456,7 @@ async function pushSelectedToProperties() {
     phone: i.data.phone, website: i.data.website, rating: i.data.rating, status: 'prospect',
   }));
   if (!selected.length) { showStatus('Nothing selected.', true); return; }
-  const { error } = await supabase.from('properties').insert(selected);
+  const { error } = await sb.from('properties').insert(selected);
   if (error) { showStatus('Error: ' + error.message, true); return; }
   showStatus(`Added ${selected.length} propert${selected.length === 1 ? 'y' : 'ies'} to Properties.`);
   await loadProperties();
