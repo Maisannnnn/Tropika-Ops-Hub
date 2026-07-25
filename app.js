@@ -49,15 +49,17 @@ function setAuthStatus(text, isError) {
 }
 
 async function onSignedIn() {
-  document.getElementById('authGate').style.display = 'none';
-  document.getElementById('appShell').style.display = 'flex';
   document.getElementById('arrivalsWindowLabel').textContent = CONFIG.ARRIVALS_WINDOW_DAYS;
   await refreshAll();
 }
 
+// NOTE: Auth is temporarily disabled for testing. The app loads directly
+// without requiring sign-in, and the matching Supabase RLS policies have
+// been relaxed to allow the anon role too (see updated schema note).
+// Re-enable by restoring the auth gate in index.html and calling
+// checkExistingSession() below instead of onSignedIn() directly.
 async function checkExistingSession() {
-  const { data } = await sb.auth.getSession();
-  if (data.session) onSignedIn();
+  await onSignedIn();
 }
 
 // ---------- Tabs ----------
