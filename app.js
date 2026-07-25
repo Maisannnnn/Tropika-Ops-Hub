@@ -1,6 +1,15 @@
 // Tropika Ops Hub — app logic
 
-const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+let supabase;
+try {
+  if (!window.supabase) throw new Error('Supabase library did not load from the CDN.');
+  supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+} catch (err) {
+  window.addEventListener('load', () => {
+    const el = document.getElementById('authStatus');
+    if (el) el.innerHTML = `<span style="color:#a83232">Setup error: ${err.message}</span>`;
+  });
+}
 
 let allProperties = [];
 let allRooms = [];
